@@ -1,5 +1,4 @@
 import {Request, Response, Router} from "express";
-import {emailAdapter} from "../adapters/email-adapter";
 import {businessService} from "../domain/business-service";
 
 
@@ -18,5 +17,5 @@ emailRouter.post('/send', async (req: Request, res: Response) => {
         "email": req.body.email,
         "message": req.body.message,
         "subject": req.body.subject,
-    })
+    });
 })

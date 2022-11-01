@@ -6,6 +6,8 @@ export const businessService = {
         //save user
         //get user from repo
         //send email
-        await emailManager.sendPasswordRecoveryMessage({email: 'dima.dimix94@mail.ru'})
+        await emailManager.sendPasswordRecoveryMessage(
+            {email: 'dima.dimix94@mail.ru'}
+        );
     }
 }

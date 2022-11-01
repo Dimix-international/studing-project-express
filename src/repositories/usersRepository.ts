@@ -17,11 +17,24 @@ export const usersRepository = {
           ]
       })
     },
+    async findByConfirmationCode (confirmationCode: string) {
+        return await usersCollection.findOne({'emailConfirmation.confirmationCode': confirmationCode})
+    },
     async createUser(user: UserDBType) {
-        const result = await usersCollection.insertOne(user);
+        await usersCollection.insertOne(user);
         return user;
     },
     async findUserById(id: ObjectId) {
        return await usersCollection.findOne({_id: id});
+    },
+    async deleteUser(id: ObjectId) {
+        return await usersCollection.deleteOne({_id: id});
+    },
+    async updateConfirmation (_id: ObjectId) {
+        const result = await usersCollection.updateOne(
+            {_id},
+            { $set: {'emailConfirmation.isConfirmed': true}} //обвновляем св-во влож объекта
+        );
+        return result.modifiedCount === 1;
     }
 }
