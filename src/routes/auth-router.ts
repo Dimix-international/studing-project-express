@@ -1,42 +1,16 @@
-import {Request, Response, Router} from "express";
-import {jwtService} from "../application/jwt-service";
-import {authService} from "../domain/auth-service";
+import {Router} from "express";
+import {container} from "../composition-root";
+import {AuthController} from "./controllers/auth-controller";
 
+const authController = container.resolve(AuthController);
 
 export const authRouter = Router({});
 
-authRouter.post('/login', async (req: Request, res: Response) => {
-    const user = await authService.checkCredentials(
-        req.body.loginOrEmail,
-        req.body.password
-    );
-    if (user) {
-        const token = await jwtService.createJWT(user);
-        res.status(200).send(token);
-    } else {
-        res.sendStatus(401);
-    }
-});
+authRouter.post('/login', authController.login.bind(authController));
 
-authRouter.post('/registration', async (req: Request, res: Response) => {
-    const {login, email, password} = req.body;
-    const user = await authService.createUser(login, email ,password);
-    if (user) {
-        res.status(201).send(user);
-    } else {
-        res.sendStatus(500);
-    }
-});
+authRouter.post('/registration', authController.registration.bind(authController));
 
-authRouter.post('/confirm-email', async (req: Request, res: Response) => {
-    const {code, email} = req.body;
-    const result = await authService.confirmEmail(code);
-    if (result) {
-        res.sendStatus(201);
-    } else {
-        res.sendStatus(400);
-    }
-});
+authRouter.post('/confirm-email', authController.confirmEmail.bind(authController));
 
 //для восстановления пароля => получаем email, генерируем recoveryPasswordCode
 // и считаем кол-во попыток и зашиваем в код id пользователя  (на подобие как confirm с expire датой)
@@ -46,13 +20,10 @@ authRouter.post('/confirm-email', async (req: Request, res: Response) => {
 //и если recoveryPasswordCode будет неправильный например 5 раз то можем заблокировать восстановления
 //так же можем трэкать кол-во запросов на количество восстановления пароля
 
-authRouter.post('/reset-registration-code', async (req: Request, res: Response) => {
-    //отправить письмо еще раз, если вдруг не пришло
-/*    const {code, email} = req.body;
-    const result = await authService.confirmEmail(code);
-    if (result) {
-        res.sendStatus(201);
-    } else {
-        res.sendStatus(400);
-    }*/
-});
+authRouter.post('/reset-registration-code', authController.resetRegistrationCode.bind(authController));
+
+//при JWT МОЖНО СОХРАНЯТЬ ДАННЫЕ о device с которого пользов зашел, ip адрес например
+//refresh токен храним в куках с флагом http only
+
+//можно в бд не хранить refresh token, делать его в формате JWT, проверять когда он сдохнет и записывать его в бд в black list
+// можно хранить его в бд, хранить дату его expires, когда он выдохнется удалять его

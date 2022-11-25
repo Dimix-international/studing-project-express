@@ -1,15 +1,8 @@
-import {Request, Response, Router} from "express";
-import {authService} from "../domain/auth-service";
+import {Router} from "express";
+import {container} from "../composition-root";
+import {UsersController} from "./controllers/users-controller";
 
-
+const usersController = container.resolve(UsersController);
 export const usersRouter = Router({});
 
-usersRouter.post('/', async(req: Request, res: Response) => {
-        const newUser = await authService.createUser(req.body.login, req.body.email, req.body.password);
-        if (newUser) {
-            res.status(201).send(newUser);
-        } else {
-            res.sendStatus(400);
-        }
-    }
-)
+usersRouter.post('/', usersController.createUser.bind(usersController));

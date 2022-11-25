@@ -1,16 +1,38 @@
-import {Request, Response, Router} from "express";
+import {Router} from "express";
 import {inputValidationMiddleware} from "../middlewares/input-validation-middleware";
 import {productsSchema} from "../schema/products-schema";
-import {ProductType} from "../repositories/db";
-import {productsService} from "../domain/product-service";
+import {container} from "../composition-root";
+import {ProductController} from "./controllers/product-controller";
+
 
 export const productsRouter = Router({});
+const productsController = container.resolve(ProductController);
+//классы которые хранят обработку запросов - контроллеры
+
+
+productsRouter.get('/', productsController.getProducts.bind(productsController));
+
+productsRouter.post('/',
+    productsSchema,
+    inputValidationMiddleware,
+    productsController.createProduct.bind(productsController)
+);
+
+productsRouter.put('/:id', productsController.updateProduct.bind(productsController));
+// без bind productsController.updateProduct будет вызван
+// от "имени" неизвестно чего - теряем контекст т.к. productsController.updateProduct передан как
+//callback
+
+productsRouter.get('/:id', productsController.getProduct.bind(productsController));
+
+productsRouter.delete('/:id', productsController.deleteProduct.bind(productsController));
+/*
 
 productsRouter.get('/', async (req: Request, res: Response) => {
     const products: ProductType[]  = await productsService
         .findProducts(req.query.title
-             ? req.query.title.toString()
-             : null);
+            ? req.query.title.toString()
+            : null);
 
     res.send(products);
 });
@@ -19,9 +41,9 @@ productsRouter.post('/',
     productsSchema,
     inputValidationMiddleware,
     async (req: Request, res: Response) => {
-    const newProduct = await productsService.createProduct(req.body.title);
-    res.status(201).send(newProduct);
-});
+        const newProduct = await productsService.createProduct(req.body.title);
+        res.status(201).send(newProduct);
+    });
 
 productsRouter.put('/:id', async (req: Request, res: Response) => {
     //:productTitle - динамическая переменная - вытаскиваем req.params.productTitle
@@ -49,4 +71,4 @@ productsRouter.delete('/:id', async (req: Request, res: Response) => {
     const isDeletedProduct = await productsService.deleteProductById(id)
     res.send(isDeletedProduct ? 204 : 404);
 
-});
+});*/

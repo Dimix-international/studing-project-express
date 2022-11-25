@@ -1,9 +1,12 @@
 import {NextFunction, Request, Response} from "express";
 import {jwtService} from "../application/jwt-service";
-import {authService} from "../domain/auth-service";
+import {container} from "../composition-root";
+import {AuthService} from "../domain/auth-service";
 
+const authService = container.resolve(AuthService);
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+
 
     if (!req.headers.authorization) {
         res.sendStatus(401);
